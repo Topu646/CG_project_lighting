@@ -24,6 +24,8 @@ void drawCube(unsigned int& cubeVAO, Shader& lightingShader, glm::mat4 model, fl
 void bed(unsigned int& cubeVAO, Shader& lightingShader, glm::mat4 alTogether);
 void floor(unsigned int& cubeVAO, Shader& lightingShader);
 void wall(unsigned int& cubeVAO, Shader& lightingShader);
+void fan(unsigned int& cubeVAO, Shader& lightingShader);
+void bedsideCabinet(unsigned int& cubeVAO, Shader& lightingShader, glm::mat4 alTogether);
 //void draw_Easy_table(Shader shaderProgram, unsigned int VAO, glm::mat4 parentTrans);
 
 glm::mat4 myPerspective(float fov, float aspect, float near, float far) {
@@ -69,7 +71,7 @@ float lookAtX = 0.0, lookAtY = 0.0, lookAtZ = 0.0;
 glm::vec3 V = glm::vec3(0.0f, 1.0f, 0.0f);
 BasicCamera basic_camera(eyeX, eyeY, eyeZ, lookAtX, lookAtY, lookAtZ, V);
 
-
+float fanRotate = 0.0;
 // positions of the point lights
 glm::vec3 pointLightPositions[] = {
     glm::vec3(1.50f,  1.50f,  0.0f),
@@ -286,6 +288,7 @@ int main()
 
     // render loop
     // -----------
+    
     while (!glfwWindowShouldClose(window))
     {
         // per-frame time logic
@@ -373,9 +376,11 @@ int main()
         //glDrawArrays(GL_TRIANGLES, 0, 36);
 
         bed(cubeVAO, lightingShader, model);
+        bedsideCabinet(cubeVAO, lightingShader, model);
         //draw floor
         floor(cubeVAO, lightingShader);
         wall(cubeVAO, lightingShader);
+        fan(cubeVAO, lightingShader);
 
         //draw_Easy_table(lightingShader, cubeVAO, identityMatrix);
 
@@ -520,6 +525,29 @@ void wall(unsigned int& cubeVAO, Shader& lightingShader)
     drawCube(cubeVAO, lightingShader, model, 0.545f, 0.371f, 0.075f, 32.0);
 }
 
+void fan(unsigned int& cubeVAO, Shader& lightingShader)
+{
+    lightingShader.use();
+    //base
+    glm::mat4 identityMatrix = glm::mat4(1.0f);
+    glm::mat4 translate = glm::mat4(1.0f);
+    glm::mat4 rotate = glm::mat4(1.0f);
+    //glm::mat4 translate2 = glm::mat4(1.0f);
+    glm::mat4 scale = glm::mat4(1.0f);
+    scale = glm::scale(identityMatrix, glm::vec3(1.0, 0.1, 0.1));
+    translate = glm::translate(identityMatrix, glm::vec3(0.0, 2.7, 0.0));
+    rotate = glm::rotate(identityMatrix, glm::radians(fanRotate), glm::vec3(0.0f, 1.0f, 0.0f));
+    glm::mat4 model = translate * rotate * scale ;
+    drawCube(cubeVAO, lightingShader, model, 0.1f, 0.31f, 0.75f, 32.0);
+
+   
+    translate = glm::translate(identityMatrix, glm::vec3(0.5, 2.7, 0.5));
+    rotate = glm::rotate(identityMatrix, glm::radians(fanRotate+90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+    model = translate *rotate * scale ;
+    drawCube(cubeVAO, lightingShader, model, 0.1f, 0.31f, 0.75f, 32.0);
+    //fanRotate += 3;
+}
+
 void bed(unsigned int& cubeVAO, Shader& lightingShader, glm::mat4 alTogether)
 {
     float baseHeight = 0.3;
@@ -597,6 +625,47 @@ void bed(unsigned int& cubeVAO, Shader& lightingShader, glm::mat4 alTogether)
     drawCube(cubeVAO, lightingShader, model, 0.545, 0.271, 0.075, 32.0);
 
 }
+
+void bedsideCabinet(unsigned int& cubeVAO, Shader& lightingShader, glm::mat4 alTogether)
+{
+    float cabinetWidth = 0.5f;
+    float cabinetDepth = 0.4f;
+    float cabinetHeight = 0.6f;
+    float legWidth = 0.1f;
+    float legHeight = 0.1f;
+
+    // Cabinet body
+    glm::mat4 model = glm::mat4(1.0f);
+    glm::mat4 translate = glm::mat4(1.0f);
+    glm::mat4 scale = glm::mat4(1.0f);
+
+    // Position the cabinet body on the right side of the bed
+    translate = glm::translate(glm::mat4(1.0f), glm::vec3(0.6f, .1, 0.55f));
+    scale = glm::scale(glm::mat4(1.0f), glm::vec3(cabinetWidth, cabinetHeight, cabinetDepth));
+    model = alTogether * translate * scale;
+    drawCube(cubeVAO, lightingShader, model, 0.545f, 0.271f, 0.075f, 32.0); // Wooden texture for cabinet
+
+    // Legs (4 legs)
+    glm::vec3 legPositions[] = {
+        glm::vec3(-cabinetWidth / 2 + legWidth / 2, 0, -cabinetDepth / 2 + legWidth / 2), // Front-left leg
+        glm::vec3(cabinetWidth / 2 - legWidth / 2, 0, -cabinetDepth / 2 + legWidth / 2),  // Front-right leg
+        glm::vec3(-cabinetWidth / 2 + legWidth / 2, 0, cabinetDepth / 2 - legWidth / 2),  // Back-left leg
+        glm::vec3(cabinetWidth / 2 - legWidth / 2, 0, cabinetDepth / 2 - legWidth / 2)   // Back-right leg
+    };
+
+    for (int i = 0; i < 4; ++i)
+    {
+        model = glm::mat4(1.0f);
+        translate = glm::translate(glm::mat4(1.0f), glm::vec3(0.8f, 0, 0.7f) + legPositions[i]);
+        scale = glm::scale(glm::mat4(1.0f), glm::vec3(legWidth, legHeight, legWidth));
+        model = alTogether * translate * scale;
+        drawCube(cubeVAO, lightingShader, model, 0.545f, 0.271f, 0.075f, 32.0); // Same wooden texture for legs
+    }
+}
+
+
+
+
 
 // process all input: query GLFW whether relevant keys are pressed/released this frame and react accordingly
 // ---------------------------------------------------------------------------------------------------------
