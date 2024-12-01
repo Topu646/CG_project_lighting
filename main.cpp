@@ -23,6 +23,7 @@ void processInput(GLFWwindow* window);
 void drawCube(unsigned int& cubeVAO, Shader& lightingShader, glm::mat4 model, float r, float g, float b, float shininess);
 void bed(unsigned int& cubeVAO, Shader& lightingShader, glm::mat4 alTogether);
 void floor(unsigned int& cubeVAO, Shader& lightingShader);
+void wall(unsigned int& cubeVAO, Shader& lightingShader);
 //void draw_Easy_table(Shader shaderProgram, unsigned int VAO, glm::mat4 parentTrans);
 
 glm::mat4 myPerspective(float fov, float aspect, float near, float far) {
@@ -374,6 +375,8 @@ int main()
         bed(cubeVAO, lightingShader, model);
         //draw floor
         floor(cubeVAO, lightingShader);
+        wall(cubeVAO, lightingShader);
+
         //draw_Easy_table(lightingShader, cubeVAO, identityMatrix);
 
         /*glm::mat4 modelForSphere = glm::mat4(1.0f);
@@ -482,9 +485,38 @@ void floor(unsigned int& cubeVAO, Shader& lightingShader)
     glm::mat4 translate = glm::mat4(1.0f);
     //glm::mat4 translate2 = glm::mat4(1.0f);
     glm::mat4 scale = glm::mat4(1.0f);
-    scale = glm::scale(identityMatrix, glm::vec3(10.0, 0.2, 10.0));
-    translate = glm::translate(identityMatrix, glm::vec3(-5.0, -0.2, -5.0));
+    scale = glm::scale(identityMatrix, glm::vec3(6.0, 0.2, 6.0));
+    translate = glm::translate(identityMatrix, glm::vec3(-3.0, -0.2, -3.0));
     glm::mat4 model = translate * scale ;
+    drawCube(cubeVAO, lightingShader, model, 0.545f, 0.371f, 0.075f, 32.0);
+
+    translate = glm::translate(identityMatrix, glm::vec3(-3.0, 2.8, -3.0));
+    model = translate * scale;
+    drawCube(cubeVAO, lightingShader, model, 0.545f, 0.371f, 0.075f, 32.0);
+}
+
+void wall(unsigned int& cubeVAO, Shader& lightingShader)
+{
+    lightingShader.use();
+    //base
+    glm::mat4 identityMatrix = glm::mat4(1.0f);
+    glm::mat4 translate = glm::mat4(1.0f);
+    //glm::mat4 translate2 = glm::mat4(1.0f);
+    glm::mat4 scale = glm::mat4(1.0f);
+    scale = glm::scale(identityMatrix, glm::vec3(0.2, 3.0, 6.0));
+    translate = glm::translate(identityMatrix, glm::vec3(-3.0, -0.2, -3.0));
+    glm::mat4 model = translate * scale;
+    drawCube(cubeVAO, lightingShader, model, 0.545f, 0.371f, 0.075f, 32.0);
+
+
+    translate = glm::translate(identityMatrix, glm::vec3(3.0, -0.2, -3.0));
+    model = translate * scale;
+    drawCube(cubeVAO, lightingShader, model, 0.545f, 0.371f, 0.075f, 32.0);
+
+    glm::mat4 rotate = glm::mat4(1.0f);
+    translate = glm::translate(identityMatrix, glm::vec3(-3.0, -0.2, 3.0));
+    rotate = glm::rotate(identityMatrix, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+    model = translate *rotate * scale ;
     drawCube(cubeVAO, lightingShader, model, 0.545f, 0.371f, 0.075f, 32.0);
 }
 
